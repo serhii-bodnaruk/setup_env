@@ -1,37 +1,65 @@
-# git
-echo "Installing git"
-sudo apt-install git -y
+function macInstall {
+  echo "INSTALL pip"
+  export PATH="/usr/local/opt/python/libexec/bin:$PATH"
+  installOrExists "python"
 
-# zsh
-echo "INSTALL zsh"
-sudo apt install zsh -y
+  echo "INSTALL curl"
+  installOrExists "curl"
 
-echo "INSTALL oh-my-zsh"
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+  echo "INSTALL oh-my-zsh"
+  sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
-# gogh
-echo "INSTALL gogh/grape terminal theme"
-bash -c "TERMINAL='gnome-terminal' $(curl -sLo- https://git.io/vQgMr)"
+  echo "INSTALLING tmux"
+  installOrExists "tmux"
 
-# vim
-echo "INSTALL curl"
-sudo apt-get install curl -y
+  echo "INSTALL ag"
+  installOrExists "the_silver_searcher"
 
-echo "INSTALL ag"
-sudo apt-get install silversearcher-ag #install ag
+  echo "INSTOLL neovim"
+  installOrExists "neovim"
 
-echo "INSTALL cmake"
-sudo apt-get install build-essential cmake -y #install build-essential cmake
+  echo "INSTALL plug"
+  curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
-echo "INSTALL python-dev"
-sudo apt-get install python-dev -y #install python-dev
+  echo "CLONE vimrc"
+  git clone git@github.com:serhii-bodnaruk/vimconf.git
+  mkdir -p ~/.config/nvim/
+  cp vimconf/init.vim ~/.config/nvim/init.vim
+  rm -rf vimconf
 
-echo "INSTOLL neovim"
-sudo apt install neovim
+  echo "CLONE tmux conf"
+  git clone git@github.com:serhii-bodnaruk/tmuxconf.git
+  cp tmuxconf/.tmux.conf ~/.tmux.conf
+  rm -rf tmuxconf
+  pip install powerline-status
 
-echo "INSTALL plug"
-curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  echo "CLONE zsh conf"
+  git clone git@github.com:serhii-bodnaruk/zshconf.git
+  cp zshconf/.zshrc ~/.zshrc
+  rm -rf zshconf
 
-echo "CLONE vimrc"
+  echo "INSTALLING asdf ruby version manager"
+  brew install asdf
+  asdf plugin-add ruby
+  asdf install ruby 3.2.2
+  asdf global ruby 3.2.2
 
+  echo "INSTALLING gh"
+  brew install gh
+  echo "INSTALLING jira-cli"
+  brew install jira
+}
 
+function installOrExists {
+  brew list $1 || brew install a -y
+}
+
+unameout="$(uname -s)"
+case "${unameout}" in
+  linux*)
+    linuxInstall
+    ;;
+  Darwin*)
+    macInstall
+    ;;
+esac
